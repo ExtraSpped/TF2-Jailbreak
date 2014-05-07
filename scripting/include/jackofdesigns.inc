@@ -150,3 +150,80 @@ stock TF2_SwitchtoSlot(client, slot)
 		}
 	}
 }
+
+stock SetClip(client, wepslot, newAmmo)
+{
+	new weapon = GetPlayerWeaponSlot(client, wepslot);
+	if (IsValidEntity(weapon))
+	{
+		new iAmmoTable = FindSendPropInfo("CTFWeaponBase", "m_iClip1");
+		SetEntData(weapon, iAmmoTable, newAmmo, 4, true);
+	}
+}
+
+stock SetAmmo(client, wepslot, newAmmo)
+{
+	new weapon = GetPlayerWeaponSlot(client, wepslot);
+	if (IsValidEntity(weapon))
+	{
+		new iOffset = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
+		new iAmmoTable = FindSendPropInfo("CTFPlayer", "m_iAmmo");
+		SetEntData(client, iAmmoTable+iOffset, newAmmo, 4, true);
+	}
+}
+
+stock CloseAllMenus()
+{
+	for (new idx = 1; idx < MaxClients; idx++)
+	{
+		if (IsClientInGame(idx))
+		{
+			if (GetClientMenu(idx))
+			{
+				CancelClientMenu(idx);
+			}
+		}
+	}
+}
+
+stock RemoveValveHat(client, bool:unhide = false)
+{
+	new edict = MaxClients+1;
+	while((edict = FindEntityByClassnameSafe(edict, "tf_wearable")) != -1)
+	{
+		decl String:netclass[32];
+		if (GetEntityNetClass(edict, netclass, sizeof(netclass)) && strcmp(netclass, "CTFWearable") == 0)
+		{
+			new idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
+			if (idx != 57 && idx != 133 && idx != 231 && idx != 444 && idx != 405 && idx != 608 && idx != 642 && GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client)
+			{
+				SetEntityRenderMode(edict, (unhide ? RENDER_NORMAL : RENDER_TRANSCOLOR));
+				SetEntityRenderColor(edict, 255, 255, 255, (unhide ? 255 : 0));
+			}
+		}
+	}
+	edict = MaxClients+1;
+	while((edict = FindEntityByClassnameSafe(edict, "tf_powerup_bottle")) != -1)
+	{
+		decl String:netclass[32];
+		if (GetEntityNetClass(edict, netclass, sizeof(netclass)) && strcmp(netclass, "CTFPowerupBottle") == 0)
+		{
+			new idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
+			if (idx != 57 && idx != 133 && idx != 231 && idx != 444 && idx != 405 && idx != 608 && idx != 642 && GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client)
+			{
+				SetEntityRenderMode(edict, (unhide ? RENDER_NORMAL : RENDER_TRANSCOLOR));
+				SetEntityRenderColor(edict, 255, 255, 255, (unhide ? 255 : 0));
+			}
+		}
+	}
+}
+
+stock StripToMelee(client)
+{
+	TF2_RemoveWeaponSlot(client, 0);
+	TF2_RemoveWeaponSlot(client, 1);
+	TF2_RemoveWeaponSlot(client, 3);
+	TF2_RemoveWeaponSlot(client, 4);
+	TF2_RemoveWeaponSlot(client, 5);
+	TF2_SwitchtoSlot(client, TFWeaponSlot_Melee);
+}
